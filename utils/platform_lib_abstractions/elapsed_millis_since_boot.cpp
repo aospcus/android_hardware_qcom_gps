@@ -1,4 +1,4 @@
-/* Copyright (c) 2013-2015, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2013, The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -9,7 +9,7 @@
  *       copyright notice, this list of conditions and the following
  *       disclaimer in the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of The Linux Foundation, nor the names of its
+ *     * Neither the name of The Linux Foundation nor the names of its
  *       contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
  *
@@ -24,42 +24,23 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
  */
-#ifndef IZAT_PROXY_BASE_H
-#define IZAT_PROXY_BASE_H
-#include <gps_extended.h>
-#include <MsgTask.h>
 
-namespace loc_core {
+#include <stdlib.h>
+#include <sys/time.h>
+#include "platform_lib_time.h"
 
-class LocApiBase;
-class LocAdapterBase;
-class ContextBase;
+int64_t systemTime(int clock)
+{
+    struct timeval t;
+    t.tv_sec = t.tv_usec = 0;
+    gettimeofday(&t, NULL);
+    return t.tv_sec*1000000LL + t.tv_usec;
+}
 
-class LBSProxyBase {
-    friend class ContextBase;
-    inline virtual LocApiBase*
-        getLocApi(const MsgTask* msgTask,
-                  LOC_API_ADAPTER_EVENT_MASK_T exMask,
-                  ContextBase* context) const {
-        return NULL;
-    }
-protected:
-    inline LBSProxyBase() {}
-public:
-    inline virtual ~LBSProxyBase() {}
-    inline virtual void requestUlp(LocAdapterBase* adapter,
-                                   unsigned long capabilities) const {}
-    inline virtual bool hasAgpsExtendedCapabilities() const { return false; }
-    inline virtual bool hasCPIExtendedCapabilities() const { return false; }
-    inline virtual void modemPowerVote(bool power) const {}
-    virtual void injectFeatureConfig(ContextBase* context) const {}
-    inline virtual IzatDevId_t getIzatDevId() const { return 0; }
-};
 
-typedef LBSProxyBase* (getLBSProxy_t)();
-
-} // namespace loc_core
-
-#endif // IZAT_PROXY_BASE_H
+int64_t elapsedMillisSinceBoot()
+{
+    int64_t t_us = systemTime(0);
+    return (int64_t) t_us / 1000LL;
+}
